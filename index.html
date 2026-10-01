@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Nilai Tabel Statistik</title>
+    
+    <!-- Memuat font Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Memuat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Memuat Library jStat via CDN untuk komputasi statistik -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        maroon: '#800000',
+                        maroonLight: '#9b111e',
+                        maroonDark: '#5c0000'
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #800000; /* Maroon background fallback */
+        }
+
+        .select-center {
+            text-align-last: center;
+        }
+
+        /* Menghilangkan panah default browser pada select dan menggantinya dengan custom arrow */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23800000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1.5rem center;
+            background-size: 1.5em;
+        }
+
+        /* Transisi halus saat menyembunyikan/menampilkan form */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Utility class untuk menghilangkan panah pada input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body class="bg-maroon min-h-screen flex items-center justify-center p-4 sm:p-8">
+
+    <div class="bg-white w-full max-w-4xl p-6 sm:p-10 md:p-14 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] transform transition-all duration-300">
+        
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 tracking-wide">STATISTIK TABEL</h1>
+            <p class="text-lg text-gray-500 font-medium tracking-wider">Kalkulator Nilai Kritis Interaktif</p>
+            <div class="w-20 h-1.5 bg-maroon mx-auto mt-5 rounded-full"></div>
+        </div>
+
+        <form id="statForm" class="flex flex-col items-center gap-4 md:gap-5 w-full" onsubmit="calculateStat(event)">
+            
+            <!-- Level 1 (90% width desktop) - Pilihan Distribusi -->
+            <div class="w-full md:w-[90%] relative group">
+                <select id="distType" onchange="updateFormInputs()" class="select-center w-full bg-gray-50 border-2 border-gray-200 text-gray-700 text-base md:text-xl rounded-2xl px-6 py-4 outline-none transition-all duration-300 focus:border-maroon focus:ring-4 focus:ring-maroon/20 hover:bg-gray-100 cursor-pointer shadow-sm font-semibold">
+                    <option value="" disabled selected>Pilih Distribusi Statistik (Z, T, Chi-Square, F)</option>
+                    <option value="z">Z-Table (Distribusi Normal Baku)</option>
+                    <option value="t">T-Table (Distribusi t-Student)</option>
+                    <option value="chi">Chi-Square Table (X²)</option>
+                    <option value="f">F-Table (Distribusi F-Ratio)</option>
+                </select>
+            </div>
+
+            <!-- Level 2 (80% width desktop) - Jenis Uji (Tail) -->
+            <div id="container-tail" class="w-full md:w-[80%] relative hidden fade-in">
+                <select id="tailType" class="select-center w-full bg-gray-50 border-2 border-gray-200 text-gray-700 text-base md:text-lg rounded-2xl px-6 py-4 outline-none transition-all duration-300 focus:border-maroon focus:ring-4 focus:ring-maroon/20 hover:bg-gray-100 cursor-pointer shadow-sm font-medium">
+                    <option value="right" selected>Uji Pihak Kanan (Right Tailed)</option>
+                    <option value="left">Uji Pihak Kiri (Left Tailed)</option>
+                    <option value="two">Uji Dua Pihak (Two Tailed)</option>
+                </select>
+            </div>
+
+            <!-- Level 3 (70% width desktop) - Nilai Alpha -->
+            <div id="container-alpha" class="w-full md:w-[70%] relative hidden fade-in">
+                <input type="number" step="any" id="valAlpha" placeholder="Nilai Alpha (Contoh: 0.05)" class="text-center w-full bg-gray-50 border-2 border-gray-200 text-gray-700 text-base md:text-lg rounded-2xl px-6 py-4 outline-none transition-all duration-300 focus:border-maroon focus:ring-4 focus:ring-maroon/20 hover:bg-gray-100 shadow-sm placeholder-gray-400 font-medium">
+            </div>
+
+            <!-- Level 4 (55% width desktop) - Derajat Bebas 1 -->
+            <div id="container-df1" class="w-full md:w-[55%] relative hidden fade-in">
+                <input type="number" id="valDf1" placeholder="Derajat Bebas / df" class="text-center w-full bg-gray-50 border-2 border-gray-200 text-gray-700 text-base md:text-lg rounded-2xl px-6 py-4 outline-none transition-all duration-300 focus:border-maroon focus:ring-4 focus:ring-maroon/20 hover:bg-gray-100 shadow-sm placeholder-gray-400 font-medium">
+            </div>
+
+            <!-- Level 5 (40% width desktop) - Derajat Bebas 2 (Khusus F-Table) -->
+            <div id="container-df2" class="w-full md:w-[40%] relative hidden fade-in">
+                <input type="number" id="valDf2" placeholder="Penyebut (df2)" class="text-center w-full bg-gray-50 border-2 border-gray-200 text-gray-700 text-base md:text-lg rounded-2xl px-6 py-4 outline-none transition-all duration-300 focus:border-maroon focus:ring-4 focus:ring-maroon/20 hover:bg-gray-100 shadow-sm placeholder-gray-400 font-medium">
+            </div>
+
+            <!-- Button Submit -->
+            <div class="mt-6 mb-2 hidden fade-in" id="container-btn">
+                <button type="submit" class="bg-maroon hover:bg-maroonLight text-white font-semibold text-lg md:text-xl py-4 px-12 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3">
+                    Cari Nilai
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </div>
+            
+        </form>
+
+        <div id="resultArea" class="mt-8 p-6 rounded-2xl border-2 border-dashed hidden fade-in text-center transition-all duration-300">
+            <h3 class="text-gray-500 font-semibold uppercase tracking-wider mb-2 text-sm md:text-base" id="resultTitle">Hasil Perhitungan</h3>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                <p class="text-3xl md:text-5xl font-bold text-gray-800" id="resultValue">-</p>
+            </div>
+            <p class="text-sm md:text-base text-gray-500 mt-4 font-medium" id="resultNote"></p>
+        </div>
+
+    </div>
+
+    <script>
+        // Deklarasi Elemen DOM
+        const distType = document.getElementById('distType');
+        const tailType = document.getElementById('tailType');
+        const containerTail = document.getElementById('container-tail');
+        const containerAlpha = document.getElementById('container-alpha');
+        const containerDf1 = document.getElementById('container-df1');
+        const containerDf2 = document.getElementById('container-df2');
+        const containerBtn = document.getElementById('container-btn');
+        const inputDf1 = document.getElementById('valDf1');
+        
+        const resultArea = document.getElementById('resultArea');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultValue = document.getElementById('resultValue');
+        const resultNote = document.getElementById('resultNote');
+
+        // Fungsi untuk mengatur kemunculan input berdasarkan tabel yang dipilih
+        function updateFormInputs() {
+            const type = distType.value;
+            
+            // Sembunyikan dan reset elemen form
+            containerTail.classList.add('hidden');
+            containerAlpha.classList.add('hidden');
+            containerDf1.classList.add('hidden');
+            containerDf2.classList.add('hidden');
+            containerBtn.classList.add('hidden');
+            resultArea.classList.add('hidden');
+
+            document.getElementById('valAlpha').value = '';
+            document.getElementById('valDf1').value = '';
+            document.getElementById('valDf2').value = '';
+            tailType.value = 'right'; // Set default ke right tail
+
+            if (!type) return;
+
+            // Memunculkan jenis uji dan alpha untuk semua distribusi
+            containerTail.classList.remove('hidden');
+            containerAlpha.classList.remove('hidden');
+            containerBtn.classList.remove('hidden');
+
+            // Logika menampilkan input derajat bebas (df)
+            if (type === 't' || type === 'chi') {
+                containerDf1.classList.remove('hidden');
+                inputDf1.placeholder = 'Derajat Bebas (df)';
+            } else if (type === 'f') {
+                containerDf1.classList.remove('hidden');
+                containerDf2.classList.remove('hidden');
+                inputDf1.placeholder = 'Pembilang (df1)';
+            }
+        }
+
+        // Fungsi untuk menampilkan pesan error di UI
+        function showError(message) {
+            resultArea.classList.remove('hidden');
+            resultArea.classList.remove('border-maroon', 'bg-gray-50', 'bg-maroon/5');
+            resultArea.classList.add('border-red-500', 'bg-red-50');
+            
+            resultTitle.innerText = "Terjadi Kesalahan";
+            resultTitle.classList.replace('text-gray-500', 'text-red-500');
+            resultTitle.classList.replace('text-maroon', 'text-red-500');
+            
+            resultValue.innerHTML = '<span class="text-red-600 text-3xl">Invalid Input</span>';
+            
+            resultNote.innerText = message;
+            resultNote.classList.replace('text-gray-500', 'text-red-600');
+            resultNote.classList.replace('text-gray-400', 'text-red-600');
+        }
+
+        // Fungsi untuk menampilkan hasil kalkulasi di UI
+        function showResult(title, valueHtml, note) {
+            resultArea.classList.remove('hidden');
+            resultArea.classList.remove('border-red-500', 'bg-red-50');
+            resultArea.classList.add('border-maroon', 'bg-maroon/5');
+            
+            resultTitle.innerText = title;
+            resultTitle.classList.remove('text-red-500', 'text-gray-500');
+            resultTitle.classList.add('text-maroon');
+            
+            resultValue.innerHTML = valueHtml; // Menggunakan innerHTML agar bisa menggunakan styling text
+            
+            resultNote.innerText = note;
+            resultNote.classList.remove('text-red-600', 'text-red-500');
+            resultNote.classList.add('text-gray-600');
+        }
+
+        function calculateStat(event) {
+            event.preventDefault(); // Mencegah reload halaman
+            
+            const type = distType.value;
+            const tail = tailType.value;
+            const alphaVal = document.getElementById('valAlpha').value;
+            const df1Val = document.getElementById('valDf1').value;
+            const df2Val = document.getElementById('valDf2').value;
+
+            // Validasi Input Alpha
+            if (!alphaVal) return showError("Nilai Alpha tidak boleh kosong.");
+            const alpha = parseFloat(alphaVal);
+            if (isNaN(alpha) || alpha <= 0 || alpha >= 1) {
+                return showError("Nilai Alpha harus berupa desimal antara 0 dan 1 (Contoh: 0.05).");
+            }
+
+            let resultHtml = "";
+            let noteStr = "";
+            let titleStr = "";
+
+            try {
+                if (type === 'z') {
+                    titleStr = "Nilai Kritis Z (Normal Baku)";
+                    
+                    if (tail === 'right') {
+                        let res = jStat.normal.inv(1 - alpha, 0, 1);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Right Tailed | Z > z_α`;
+                    } else if (tail === 'left') {
+                        let res = jStat.normal.inv(alpha, 0, 1);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Left Tailed | Z < -z_α`;
+                    } else if (tail === 'two') {
+                        let res = jStat.normal.inv(1 - (alpha / 2), 0, 1);
+                        resultHtml = `<span class="text-gray-800">± ${res.toFixed(5)}</span>`;
+                        noteStr = `Two Tailed | |Z| > z_α/2`;
+                    }
+                
+                } else if (type === 't') {
+                    if (!df1Val) return showError("Derajat bebas (df) tidak boleh kosong.");
+                    const df = parseInt(df1Val);
+                    if (isNaN(df) || df <= 0) return showError("Derajat bebas (df) harus bilangan bulat positif.");
+                    
+                    titleStr = "Nilai Kritis t (Student)";
+                    
+                    if (tail === 'right') {
+                        let res = jStat.studentt.inv(1 - alpha, df);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Right Tailed | df: ${df}`;
+                    } else if (tail === 'left') {
+                        let res = jStat.studentt.inv(alpha, df);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Left Tailed | df: ${df}`;
+                    } else if (tail === 'two') {
+                        let res = jStat.studentt.inv(1 - (alpha / 2), df);
+                        resultHtml = `<span class="text-gray-800">± ${res.toFixed(5)}</span>`;
+                        noteStr = `Two Tailed | df: ${df}`;
+                    }
+
+                } else if (type === 'chi') {
+                    if (!df1Val) return showError("Derajat bebas (df) tidak boleh kosong.");
+                    const df = parseInt(df1Val);
+                    if (isNaN(df) || df <= 0) return showError("Derajat bebas (df) harus bilangan bulat positif.");
+                    
+                    titleStr = "Nilai Kritis Chi-Square (X²)";
+                    
+                    if (tail === 'right') {
+                        let res = jStat.chisquare.inv(1 - alpha, df);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Right Tailed | df: ${df}`;
+                    } else if (tail === 'left') {
+                        let res = jStat.chisquare.inv(alpha, df);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Left Tailed | df: ${df}`;
+                    } else if (tail === 'two') {
+                        let lower = jStat.chisquare.inv(alpha / 2, df);
+                        let upper = jStat.chisquare.inv(1 - (alpha / 2), df);
+                        // Distribusi asimetris tidak bisa menggunakan ±
+                        resultHtml = `
+                            <div class="flex flex-col text-2xl md:text-3xl gap-2">
+                                <div><span class="text-gray-400 text-lg">Batas Bawah:</span> <span class="text-gray-800">${lower.toFixed(5)}</span></div>
+                                <div><span class="text-gray-400 text-lg">Batas Atas:</span> <span class="text-gray-800">${upper.toFixed(5)}</span></div>
+                            </div>
+                        `;
+                        noteStr = `Two Tailed | df: ${df}`;
+                    }
+
+                } else if (type === 'f') {
+                    if (!df1Val || !df2Val) return showError("Kedua derajat bebas (df1 dan df2) tidak boleh kosong.");
+                    const df1 = parseInt(df1Val);
+                    const df2 = parseInt(df2Val);
+                    if (isNaN(df1) || df1 <= 0 || isNaN(df2) || df2 <= 0) {
+                        return showError("Derajat bebas (df1 & df2) harus bilangan bulat positif.");
+                    }
+                    
+                    titleStr = "Nilai Kritis F-Ratio";
+                    
+                    if (tail === 'right') {
+                        let res = jStat.centralF.inv(1 - alpha, df1, df2);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Right Tailed | df1: ${df1}, df2: ${df2}`;
+                    } else if (tail === 'left') {
+                        let res = jStat.centralF.inv(alpha, df1, df2);
+                        resultHtml = `<span class="text-gray-800">${res.toFixed(5)}</span>`;
+                        noteStr = `Left Tailed | df1: ${df1}, df2: ${df2}`;
+                    } else if (tail === 'two') {
+                        let lower = jStat.centralF.inv(alpha / 2, df1, df2);
+                        let upper = jStat.centralF.inv(1 - (alpha / 2), df1, df2);
+                        // Distribusi asimetris tidak bisa menggunakan ±
+                        resultHtml = `
+                            <div class="flex flex-col text-2xl md:text-3xl gap-2">
+                                <div><span class="text-gray-400 text-lg">Batas Bawah:</span> <span class="text-gray-800">${lower.toFixed(5)}</span></div>
+                                <div><span class="text-gray-400 text-lg">Batas Atas:</span> <span class="text-gray-800">${upper.toFixed(5)}</span></div>
+                            </div>
+                        `;
+                        noteStr = `Two Tailed | df1: ${df1}, df2: ${df2}`;
+                    }
+                }
+
+                // Tampilkan Hasil
+                showResult(titleStr, resultHtml, noteStr);
+
+            } catch (error) {
+                console.error(error);
+                showError("Perhitungan gagal. Pastikan parameter input valid untuk distribusi yang dipilih.");
+            }
+        }
+    </script>
+</body>
+</html>
