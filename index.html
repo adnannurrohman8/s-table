@@ -1,62 +1,70 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencarian Nilai Tabel Statistik</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- jStat Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
 
-    <title>S-Table</title>
-
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<body>
-
-    <h1>Tabel Statistik</h1>
-
-    <div class="container">
-
-        <label>Distribusi</label>
-
-        <select id="distribution">
-            <option value="z">Distribusi Z</option>
-            <option value="t">Distribusi t</option>
-        </select>
-
-        <label>Taraf Signifikansi</label>
-
-        <select id="alpha">
-            <option value="0.10">10%</option>
-            <option value="0.05" selected>5%</option>
-            <option value="0.01">1%</option>
-        </select>
-
-        <div id="df-container">
-
-            <label>Derajat Bebas (df)</label>
-
-            <input
-                type="number"
-                id="df"
-                placeholder="Masukkan df"
-            >
-
+    <div class="bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 w-full max-w-4xl flex flex-col items-center space-y-6">
+        
+        <div class="text-center mb-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#800000] tracking-tight mb-2">Tabel Statistik</h1>
+            <p class="text-gray-500 text-lg">Kalkulator Nilai Kritis Distribusi Z dan T</p>
         </div>
 
-        <button onclick="calculate()">
-            Cari Nilai
-        </button>
+        <div class="w-full w-level-1 flex justify-center transition-all duration-500">
+            <select id="distType" class="custom-input bg-gray-50 font-semibold" onchange="handleDistChange()">
+                <option value="" disabled selected>Memilih tabel distribusi yang mau dipake di sini</option>
+                <option value="z">Z - Table (Normal Standar)</option>
+                <option value="t">T - Table (Student's t)</option>
+            </select>
+        </div>
 
-        <div id="result"></div>
+        <div id="container-alpha" class="w-full w-level-2 flex justify-center hidden opacity-0 transition-opacity duration-500">
+            <input type="number" id="alpha" step="0.01" class="custom-input" placeholder="Taraf signifikansi (Alpha, misal: 0.05)">
+        </div>
+
+        <div id="container-df" class="w-full w-level-3 flex justify-center hidden opacity-0 transition-opacity duration-500">
+            <input type="number" id="df" class="custom-input" placeholder="Derajat Kebebasan (df)">
+        </div>
+
+        <div id="container-tail" class="w-full w-level-4 flex justify-center hidden opacity-0 transition-opacity duration-500">
+            <select id="tail" class="custom-input bg-gray-50 text-base">
+                <option value="" disabled selected>Pilih Jenis Uji Arah</option>
+                <option value="right">Right-Tailed (1 Arah Kanan)</option>
+                <option value="left">Left-Tailed (1 Arah Kiri)</option>
+                <option value="two">Two-Tailed (2 Arah)</option>
+            </select>
+        </div>
+
+        <div id="container-btn" class="pt-6 hidden opacity-0 transition-opacity duration-500 w-full flex justify-center">
+            <button onclick="calculateValue()" class="bg-[#800000] text-white font-bold py-3 px-10 rounded-full hover:bg-red-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 text-lg">
+                Cari Nilai
+            </button>
+        </div>
+
+        <div id="resultArea" class="w-full text-center mt-6 p-6 rounded-2xl hidden">
+            <h3 class="text-gray-500 font-medium mb-1">Hasil Perhitungan:</h3>
+            <p id="resultText" class="text-4xl font-bold text-[#800000]"></p>
+        </div>
 
     </div>
 
-    <!-- jStat -->
-    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
-
-    <!-- JavaScript kita -->
+    <!-- Custom JavaScript -->
     <script src="script.js"></script>
-
 </body>
-
 </html>
