@@ -1,11 +1,11 @@
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+
+    font-family: Arial, sans-serif;
 
     background: #800020;
 
@@ -13,82 +13,68 @@ body {
 
     display: flex;
     justify-content: center;
-    align-items: flex-start;
 
-    padding: 50px 20px;
-}
-
-.container {
-    width: 100%;
-    max-width: 650px;
-
-    text-align: center;
+    padding-top: 50px;
 }
 
 h1 {
+    position: absolute;
+
+    top: 20px;
+
     color: white;
 
-    font-size: 42px;
-
-    margin-bottom: 25px;
+    font-size: 40px;
 }
 
+.container {
 
-.form-box {
+    width: 530px;
+
+    margin-top: 80px;
+
+    text-align: center;
+}
+
+label {
+    display: block;
+
     background: white;
+
+    padding: 18px;
+
+    margin-top: 20px;
 
     border-radius: 30px;
 
-    padding: 20px 30px;
-
-    margin-bottom: 20px;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 10px;
-}
-
-.form-box label {
     font-size: 20px;
+
     font-weight: bold;
-
-    color: #111;
 }
-
 
 select,
 input {
+
     width: 100%;
 
-    padding: 14px 18px;
+    padding: 18px;
 
-    border: 2px solid #ddd;
+    margin-top: 10px;
 
-    border-radius: 15px;
+    border: none;
 
-    font-size: 17px;
+    border-radius: 25px;
 
-    background: white;
+    font-size: 18px;
 
     text-align: center;
-
-    outline: none;
 }
-
-
-select:focus,
-input:focus {
-    border-color: #800020;
-}
-
 
 button {
-    width: 70%;
 
-    padding: 16px;
+    margin-top: 25px;
 
-    margin: 10px auto 25px;
+    padding: 16px 40px;
 
     border: none;
 
@@ -98,102 +84,27 @@ button {
 
     color: #800020;
 
-    font-size: 20px;
+    font-size: 18px;
 
     font-weight: bold;
 
     cursor: pointer;
-
-    transition: 0.2s;
 }
-
 
 button:hover {
-    transform: scale(1.03);
 
-    background: #f5f5f5;
+    transform: scale(1.03);
 }
 
+#result {
 
-.result {
+    margin-top: 30px;
+
+    padding: 25px;
+
     background: white;
 
     border-radius: 30px;
 
-    padding: 25px;
-
-    text-align: left;
-
-    display: none;
-}
-
-
-.result h2 {
-    text-align: center;
-
-    margin-bottom: 20px;
-
-    color: #800020;
-}
-
-
-.result-table {
-    width: 100%;
-
-    border-collapse: collapse;
-
-    margin-top: 15px;
-}
-
-
-.result-table th,
-.result-table td {
-    border: 1px solid #ccc;
-
-    padding: 12px;
-
-    text-align: center;
-}
-
-
-.result-table th {
-    background: #800020;
-
-    color: white;
-}
-
-
-.info {
-    margin-top: 15px;
-
-    line-height: 1.6;
-}
-
-
-.error {
-    color: #b00020;
-
-    font-weight: bold;
-
-    text-align: center;
-}
-
-
-@media (max-width: 600px) {
-
-    body {
-        padding: 30px 15px;
-    }
-
-    h1 {
-        font-size: 32px;
-    }
-
-    .form-box {
-        padding: 18px;
-    }
-
-    button {
-        width: 90%;
-    }
+    font-size: 18px;
 }
