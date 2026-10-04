@@ -1,79 +1,62 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabel Statistik</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Library jStat -->
-    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Tabel statistik</h1>
 
-        <!-- Distribusi -->
-        <div class="form-box">
-            <label for="distribution">
-                Memilih tabel distribusi
-            </label>
-            <select id="distribution">
-                <option value="z">Distribusi Normal (Z)</option>
-                <option value="t">Distribusi t (Student)</option>
-            </select>
-        </div>
-        <!-- Signifikansi -->
-        <div class="form-box">
-            <label for="alpha">
-                Taraf signifikansi
-            </label>
-            <select id="alpha">
-                <option value="0.10">10%</option>
-                <option value="0.05" selected>5%</option>
-                <option value="0.01">1%</option>
-            </select>
-        </div>
-        <!-- Derajat bebas -->
-        <div class="form-box df-box" id="dfContainer">
-            <label for="df">
-                df
-            </label>
+    <title>S-Table</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>Tabel Statistik</h1>
+
+    <div class="container">
+
+        <label>Distribusi</label>
+
+        <select id="distribution">
+            <option value="z">Distribusi Z</option>
+            <option value="t">Distribusi t</option>
+        </select>
+
+        <label>Taraf Signifikansi</label>
+
+        <select id="alpha">
+            <option value="0.10">10%</option>
+            <option value="0.05" selected>5%</option>
+            <option value="0.01">1%</option>
+        </select>
+
+        <div id="df-container">
+
+            <label>Derajat Bebas (df)</label>
+
             <input
                 type="number"
                 id="df"
-                min="1"
                 placeholder="Masukkan df"
             >
+
         </div>
-        <!-- Jenis pengujian -->
-        <div class="form-box">
-            <label for="tail">
-                Jenis pengujian
-            </label>
-            <select id="tail">
-                <option value="two">
-                    Dua sisi (two-tailed)
-                </option>
-                <option value="right">
-                    Satu sisi kanan
-                </option>
-                <option value="left">
-                    Satu sisi kiri
-                </option>
-            </select>
-        </div>
-        <!-- Tombol -->
-        <button id="calculate">
-            Cari nilai tabel
+
+        <button onclick="calculate()">
+            Cari Nilai
         </button>
-        <!-- Hasil -->
-        <div class="result" id="result">
-            <h2>Hasil</h2>
-            <div id="resultContent">
-                Silakan masukkan parameter terlebih dahulu.
-            </div>
-        </div>
+
+        <div id="result"></div>
+
     </div>
+
+    <!-- jStat -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+
+    <!-- JavaScript kita -->
     <script src="script.js"></script>
+
 </body>
+
 </html>
