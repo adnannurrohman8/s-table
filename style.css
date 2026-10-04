@@ -1,110 +1,35 @@
-* {
-    box-sizing: border-box;
-}
-
 body {
-    margin: 0;
-
-    font-family: Arial, sans-serif;
-
-    background: #800020;
-
-    min-height: 100vh;
-
-    display: flex;
-    justify-content: center;
-
-    padding-top: 50px;
+    font-family: 'Poppins', sans-serif;
+    background-color: #800000; /* Maroon */
 }
 
-h1 {
-    position: absolute;
-
-    top: 20px;
-
-    color: white;
-
-    font-size: 40px;
-}
-
-.container {
-
-    width: 530px;
-
-    margin-top: 80px;
-
-    text-align: center;
-}
-
-label {
-    display: block;
-
-    background: white;
-
-    padding: 18px;
-
-    margin-top: 20px;
-
-    border-radius: 30px;
-
-    font-size: 20px;
-
-    font-weight: bold;
-}
-
-select,
-input {
-
+.custom-input {
     width: 100%;
-
-    padding: 18px;
-
-    margin-top: 10px;
-
-    border: none;
-
-    border-radius: 25px;
-
-    font-size: 18px;
-
+    padding: 0.75rem 1rem;
     text-align: center;
+    border: 2px solid #e2e8f0;
+    border-radius: 9999px;
+    outline: none;
+    transition: all 0.3s ease;
+    font-size: 1.125rem;
+    color: #1f2937;
 }
 
-button {
+.custom-input:focus {
+    border-color: #800000;
+    box-shadow: 0 0 0 4px rgba(128, 0, 0, 0.1);
+}
 
-    margin-top: 25px;
-
-    padding: 16px 40px;
-
-    border: none;
-
-    border-radius: 30px;
-
-    background: white;
-
-    color: #800020;
-
-    font-size: 18px;
-
-    font-weight: bold;
-
+select.custom-input {
+    text-align-last: center;
+    appearance: none;
     cursor: pointer;
 }
 
-button:hover {
-
-    transform: scale(1.03);
-}
-
-#result {
-
-    margin-top: 30px;
-
-    padding: 25px;
-
-    background: white;
-
-    border-radius: 30px;
-
-    font-size: 18px;
+/* Pengaturan lebar untuk efek piramida terbalik pada desktop */
+@media (min-width: 768px) {
+    .w-level-1 { width: 90%; }
+    .w-level-2 { width: 75%; }
+    .w-level-3 { width: 60%; }
+    .w-level-4 { width: 45%; }
 }
